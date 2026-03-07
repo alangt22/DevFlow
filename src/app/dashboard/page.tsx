@@ -1,10 +1,12 @@
 
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import LogoutButton from "@/components/logout-button";
+import { CreateBoard } from "./_components/create-board";
+import { BoardsList } from "./_components/boards-list";
+
 
 export default async function Dashboard() {
-
+  
     const session = await auth();
 
     if (!session) {
@@ -12,18 +14,12 @@ export default async function Dashboard() {
     }
 
   return (
-    <div className="flex flex-col h-screen items-center justify-center gap-4">
-      <h1 className="text-4xl font-bold">Dashboard</h1>
-      <p>Bem-vindo, {session.user?.name}</p>
-      <p className="text-gray-500">{session.user?.email}</p>
-      {session.user?.image && (
-        <img 
-          src={session.user.image} 
-          alt="Avatar" 
-          className="w-16 h-16 rounded-full mt-2"
-        />
-      )}
-      <LogoutButton />
+    <div className="">
+      <h1 className="text-2xl font-bold capitalize">Bem-vindo, {session.user?.name}</h1>
+      <p className="text-gray-500 mb-20">{session.user?.email}</p>
+
+      <CreateBoard />
+      <BoardsList />
     </div>
   )
 }

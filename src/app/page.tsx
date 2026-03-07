@@ -1,19 +1,35 @@
 "use client";
+
 import { signIn } from "next-auth/react";
+import { FcGoogle } from "react-icons/fc";
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center">
-      <h1 className="text-3xl font-bold underline">
-        Hello world!
-      </h1>
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-300 to-blue-500 text-white px-6">
+      <div className="max-w-2xl text-center flex flex-col items-center gap-6">
 
-      <button
-       onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
-       className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4">
-        login com google
-      </button>
+        <h1 className="text-5xl font-extrabold">
+          Dev<span className="text-blue-500">Flow</span>
+        </h1>
 
-    </div>
+        <p className="text-gray-900 text-lg font-bold">
+          Organize seus projetos, tarefas e fluxo de desenvolvimento em um único lugar.
+          Um painel simples e eficiente para desenvolvedores gerenciarem suas atividades.
+        </p>
+
+        <button
+          onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+          className="cursor-pointer flex items-center gap-3 bg-white text-black font-semibold px-6 py-3 rounded-lg hover:scale-105 transition"
+        >
+          <FcGoogle size={24} />
+          Entrar com Google
+        </button>
+
+        <p className="text-sm text-gray-700 mt-6">
+          Gerencie boards, tarefas e fluxo de desenvolvimento.
+        </p>
+
+      </div>
+    </main>
   );
 }
