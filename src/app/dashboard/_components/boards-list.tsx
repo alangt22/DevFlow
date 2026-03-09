@@ -1,8 +1,9 @@
 "use client";
 
-import { getBoards } from "@/lib/getBoards";
+import { useState } from "react";
+import useSWR from "swr";
+import axios from "axios";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { FiTrash } from "react-icons/fi";
 import { toast } from "sonner";
 
@@ -11,27 +12,21 @@ interface Board {
   title: string;
 }
 
-export function BoardsList() {
-  const [boards, setBoards] = useState<Board[]>([]);
-  const [boardToDelete, setBoardToDelete] = useState<Board | null>(null);
+const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 
-  useEffect(() => {
-    async function load() {
-      const data = await getBoards();
-      setBoards(data);
-    }
-    load();
-  }, []);
+export function BoardsList() {
+  const { data: boards = [], isLoading, mutate } = useSWR<Board[]>("/api/boards", fetcher);
+  const [boardToDelete, setBoardToDelete] = useState<Board | null>(null);
+  const [loading, setLoading] = useState(false);
 
   async function handleDelete() {
     if (!boardToDelete) return;
+    setLoading(true);
 
-    await fetch(`/api/boards/${boardToDelete.id}`, {
-      method: "DELETE",
-    });
+    await axios.delete(`/api/boards/${boardToDelete.id}`);
 
     toast.success("Board deletado com sucesso!", {
-            position: "top-right",
+      position: "top-right",
       duration: 2000,
       style: {
         borderRadius: "10px",
@@ -41,8 +36,9 @@ export function BoardsList() {
       },
     });
 
-    setBoards((prev) => prev.filter((b) => b.id !== boardToDelete.id));
+    mutate(boards.filter((b) => b.id !== boardToDelete.id));
     setBoardToDelete(null);
+    setLoading(false);
   }
 
   return (
@@ -51,11 +47,12 @@ export function BoardsList() {
       <h1 className="text-2xl font-bold">Seus Boards</h1>
 
       <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {boards.length === 0 && <p className="text-gray-200">Nenhum board criado ainda.</p>}
-        {boards.map((board) => (
+        {isLoading && <p className="text-gray-200">Carregando...</p>}
+        {!isLoading && boards.length === 0 && <p className="text-gray-200">Nenhum board criado ainda.</p>}
+        {!isLoading && boards.map((board) => (
           <li key={board.id}>
             <Link
-              href={`/boards/${board.id}`}
+              href={`/dashboard/boards/${board.id}`}
               className="p-4 rounded-lg border border-blue-400 bg-blue-600 hover:bg-gray-800 transition flex justify-between"
             >
               <p className="font-semibold">{board.title}</p>
@@ -102,8 +99,9 @@ export function BoardsList() {
               <button
                 onClick={handleDelete}
                 className="cursor-pointer px-4 py-2 rounded bg-red-600 hover:bg-red-700"
+                disabled={loading}
               >
-                Deletar
+                {loading ? "Deletando..." : "Deletar"}
               </button>
             </div>
           </div>

@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
+import axios from "axios";
 import { toast } from "sonner";
+import { mutate } from "swr";
 
 interface Board {
   id: string;
@@ -16,35 +18,28 @@ export function CreateBoard() {
 
     setLoading(true);
 
-    const res = await fetch("/api/boards", {
-      method: "POST",
-      body: JSON.stringify({ title }),
-    });
+    try {
+      await axios.post<Board>("/api/boards", { title });
 
-    if (!res.ok) {
+      mutate("/api/boards");
+
+      toast.success("Board criado com sucesso!", {
+        position: "top-right",
+        duration: 2000,
+        style: {
+          borderRadius: "10px",
+          background: "#29e251",
+          color: "#ffffff",
+          fontWeight: "bold",
+        },
+      });
+
+      setTitle("");
+    } catch {
       toast.error("Erro ao criar board");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const newBoard: Board = await res.json();
-
-    window.dispatchEvent(new CustomEvent("board-created", { detail: newBoard }));
-
-    toast.success("Board criado com sucesso!", {
-      position: "top-right",
-      duration: 2000,
-      style: {
-        borderRadius: "10px",
-        background: "#29e251",
-        color: "#ffffff",
-        fontWeight: "bold",
-      },
-    });
-
-
-    setTitle("");
-    setLoading(false);
   }
 
   return (

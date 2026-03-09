@@ -14,28 +14,27 @@ export async function DELETE(
 
   const { id } = await context.params;
 
-  console.log("Board ID:", id);
 
   if (!id) {
     return NextResponse.json({ error: "ID não enviado" }, { status: 400 });
   }
 
-  const board = await prisma.board.findUnique({
+  const list = await prisma.list.findUnique({
     where: { id },
   });
 
-  if (!board) {
-    return NextResponse.json({ error: "Board não encontrado" }, { status: 404 });
+  if (!list) {
+    return NextResponse.json({ error: "Lista não encontrada" }, { status: 404 });
   }
 
-  await prisma.board.delete({
+  await prisma.list.delete({
     where: { id },
   });
 
   return NextResponse.json({ success: true });
 }
 
-export async function GET(
+export async function PUT(
   req: Request,
   context: { params: Promise<{ id: string }> }
 ) {
@@ -46,20 +45,26 @@ export async function GET(
   }
 
   const { id } = await context.params;
+  const { title } = await req.json();
 
 
   if (!id) {
     return NextResponse.json({ error: "ID não enviado" }, { status: 400 });
   }
 
-  const board = await prisma.board.findUnique({
-    where: { id, userId: session.user.id },
+  const list = await prisma.list.findUnique({
+    where: { id},
   });
 
-  if (!board) {
-    return NextResponse.json({ error: "Board não encontrado" }, { status: 404 });
+  if (!list) {
+    return NextResponse.json({ error: "Lista não encontrada" }, { status: 404 });
   }
 
+  const updatedList = await prisma.list.update({
+    where: { id },
+    data: { title },
+  });
 
-  return NextResponse.json(board);
+
+  return NextResponse.json(updatedList);
 }

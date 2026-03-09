@@ -1,6 +1,5 @@
 import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
-
 import { createBoardSchema } from "@/lib/validations/board.schema"
 import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
