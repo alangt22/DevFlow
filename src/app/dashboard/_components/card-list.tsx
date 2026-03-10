@@ -1,35 +1,29 @@
 "use client";
 
-import useSWR from "swr";
-import axios from "axios";
-import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
-
 import {
   SortableContext,
   verticalListSortingStrategy,
   useSortable,
-  arrayMove,
 } from "@dnd-kit/sortable";
 
 import { CSS } from "@dnd-kit/utilities";
-import { useEffect, useState } from "react";
 
 interface Card {
   id: string;
   title: string;
   order: number;
+  listId: string;
   description?: string;
 }
 
-const fetcher = (url: string) => axios.get(url).then((res) => res.data);
-
 function SortableCard({ card }: { card: Card }) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: card.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0.5 : 1,
   };
 
   return (
@@ -46,57 +40,26 @@ function SortableCard({ card }: { card: Card }) {
   );
 }
 
-export function CardList({ listId }: { listId: string }) {
-  const { data: cards = [], isLoading } = useSWR<Card[]>(
-    listId ? `/api/cards?listId=${listId}` : null,
-    fetcher,
-  );
+interface CardListProps {
+  cards: Card[];
+}
 
-  const [items, setItems] = useState<Card[]>([]);
-
-  useEffect(() => {
-    if (cards.length) {
-      setItems(cards);
-    }
-  }, [cards]);
-
-  async function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-
-    if (!over || active.id === over.id) return;
-
-    const oldIndex = items.findIndex((item) => item.id === active.id);
-    const newIndex = items.findIndex((item) => item.id === over.id);
-
-    const newItems = arrayMove(items, oldIndex, newIndex);
-
-    setItems(newItems);
-
-    const payload = newItems.map((card, index) => ({
-      id: card.id,
-      order: index,
-    }));
-
-    await axios.put("/api/cards/reorder", payload);
-  }
+export function CardList({ cards }: CardListProps) {
+  const sortedCards = [...cards].sort((a, b) => a.order - b.order);
 
   return (
-    <div className="flex flex-col">
-      {isLoading && <p className="text-gray-500 text-sm">Carregando...</p>}
-      {!isLoading && cards.length === 0 && (
-        <p className="text-gray-400 text-sm italic">Nenhum card</p>
+    <div className="flex flex-col min-h-[50px]">
+      {sortedCards.length === 0 && (
+        <p className="text-gray-400 text-sm italic p-2">Nenhum card</p>
       )}
-
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext
-          items={items.map((card) => card.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          {items.map((card) => (
-            <SortableCard key={card.id} card={card} />
-          ))}
-        </SortableContext>
-      </DndContext>
+      <SortableContext
+        items={sortedCards.map((card) => card.id)}
+        strategy={verticalListSortingStrategy}
+      >
+        {sortedCards.map((card) => (
+          <SortableCard key={card.id} card={card} />
+        ))}
+      </SortableContext>
     </div>
   );
 }
