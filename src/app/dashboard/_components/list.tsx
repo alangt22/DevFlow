@@ -68,6 +68,8 @@ function SortableList({
   onDelete,
   isOverlay,
   onCardCreated,
+  onCardDeleted,
+  onCardUpdated,
 }: {
   list: List;
   cards: Card[];
@@ -75,6 +77,8 @@ function SortableList({
   onDelete: (list: List) => void;
   isOverlay?: boolean;
   onCardCreated?: (card: Card) => void;
+  onCardDeleted?: (cardId: string) => void;
+  onCardUpdated?: (card: Card) => void;
 }) {
   const {
     attributes,
@@ -103,7 +107,7 @@ function SortableList({
           </div>
         </div>
         <div className="border-b border-gray-500 mb-2"></div>
-        <CardList cards={cards} />
+        <CardList cards={cards} onCardDeleted={onCardDeleted} onCardUpdated={onCardUpdated} />
       </div>
     );
   }
@@ -143,7 +147,7 @@ function SortableList({
       </div>
       <div className="border-b border-gray-500 mb-2"></div>
       <DroppableList listId={list.id}>
-        <CardList cards={cards} />
+        <CardList cards={cards} onCardDeleted={onCardDeleted} onCardUpdated={onCardUpdated} />
       </DroppableList>
       <CreateCard listId={list.id} onCardCreated={onCardCreated} />
     </div>
@@ -358,6 +362,21 @@ export function Lists({ boardId }: { boardId: string }) {
     }));
   }
 
+  function handleCardDeleted(listId: string, cardId: string) {
+    setCardsMap((prev) => ({
+      ...prev,
+      [listId]: (prev[listId] || []).filter((c) => c.id !== cardId),
+    }));
+  }
+function handleCardUpdated(listId: string, updatedCard: Card) {
+  setCardsMap((prev) => ({
+    ...prev,
+    [listId]: (prev[listId] || []).map((c) =>
+      c.id === updatedCard.id ? updatedCard : c
+    ),
+  }));
+}
+
   return (
     <div className="flex gap-3 flex-wrap overflow-x-auto pb-4 px-1 mt-10">
       {isLoading && <p className="text-gray-200">Carregando...</p>}
@@ -382,6 +401,8 @@ export function Lists({ boardId }: { boardId: string }) {
               onUpdate={(l) => setListToUpdate(l)}
               onDelete={(l) => setListToDelete(l)}
               onCardCreated={(card) => handleCardCreated(list.id, card)}
+              onCardDeleted={(cardId) => handleCardDeleted(list.id, cardId)}
+              onCardUpdated={(card) => handleCardUpdated(list.id, card)}
             />
           ))}
         </SortableContext>
