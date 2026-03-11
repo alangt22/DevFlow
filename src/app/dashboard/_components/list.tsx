@@ -67,12 +67,14 @@ function SortableList({
   onUpdate,
   onDelete,
   isOverlay,
+  onCardCreated,
 }: {
   list: List;
   cards: Card[];
   onUpdate: (list: List) => void;
   onDelete: (list: List) => void;
   isOverlay?: boolean;
+  onCardCreated?: (card: Card) => void;
 }) {
   const {
     attributes,
@@ -143,7 +145,7 @@ function SortableList({
       <DroppableList listId={list.id}>
         <CardList cards={cards} />
       </DroppableList>
-      <CreateCard listId={list.id} />
+      <CreateCard listId={list.id} onCardCreated={onCardCreated} />
     </div>
   );
 }
@@ -339,7 +341,7 @@ export function Lists({ boardId }: { boardId: string }) {
         duration: 2000,
       });
       mutateLists(
-        lists.map((l) => (l.id === listToUpdate.id ? listToUpdate : l)),
+        lists.map((l) => (l.id === listToUpdate.id ? listToUpdate : l))
       );
       setListToUpdate(null);
     } catch {
@@ -347,6 +349,13 @@ export function Lists({ boardId }: { boardId: string }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleCardCreated(listId: string, card: Card) {
+    setCardsMap((prev) => ({
+      ...prev,
+      [listId]: [...(prev[listId] || []), card],
+    }));
   }
 
   return (
@@ -372,6 +381,7 @@ export function Lists({ boardId }: { boardId: string }) {
               cards={cardsMap[list.id] || []}
               onUpdate={(l) => setListToUpdate(l)}
               onDelete={(l) => setListToDelete(l)}
+              onCardCreated={(card) => handleCardCreated(list.id, card)}
             />
           ))}
         </SortableContext>

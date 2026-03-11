@@ -8,10 +8,12 @@ import { FiPlus } from "react-icons/fi";
 interface Card {
   id: string;
   title: string;
+  order: number;
+  listId: string;
   description?: string;
 }
 
-export function CreateCard({ listId }: { listId: string }) {
+export function CreateCard({ listId, onCardCreated }: { listId: string; onCardCreated?: (card: Card) => void }) {
   const [cardTitle, setCardTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -22,12 +24,16 @@ export function CreateCard({ listId }: { listId: string }) {
     setLoading(true);
 
     try {
-      await axios.post<Card>("/api/cards", {
+      const { data } = await axios.post<Card>("/api/cards", {
         title: cardTitle,
         listId: listId,
       });
 
       mutate(`/api/cards?listId=${listId}`);
+      
+      if (onCardCreated) {
+        onCardCreated({ ...data, order: data.order || 0, listId });
+      }
 
       toast.success("Card criado com sucesso!", {
         position: "top-right",
