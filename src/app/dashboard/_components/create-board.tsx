@@ -50,8 +50,13 @@ export function CreateBoard() {
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          onKeyDown={(e) => {
+            if(e.key === "Enter"){
+              createBoard();
+            }
+          }}
           placeholder="Nome do board"
-          className="border p-2 rounded w-full h-10 focus:outline-none"
+          className="border p-2 rounded w-80 h-10 focus:outline-none"
         />
 
         <button

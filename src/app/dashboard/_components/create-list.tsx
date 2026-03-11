@@ -58,8 +58,13 @@ export function CreateList({ boardId }: { boardId: string }) {
   }
 
   return (
-    <div className="min-w-[272px] max-w-[272px] bg-[#b7c7e6] rounded-lg p-2">
+    <div className="min-w-[272px] max-w-[272px] bg-[#a1b3d8] rounded-lg p-2">
       <input
+        onKeyDown={(e) => {
+          if(e.key === "Enter"){
+            createList()
+          }
+        }}
         value={listTitle}
         onChange={(e) => setListTitle(e.target.value)}
         placeholder="Título da lista"

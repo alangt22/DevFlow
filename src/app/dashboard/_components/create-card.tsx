@@ -69,6 +69,11 @@ export function CreateCard({ listId, onCardCreated }: { listId: string; onCardCr
   return (
     <div className="min-w-[256px] max-w-[232px] bg-[#b7c7e6] rounded-lg p-2">
       <input
+        onKeyDown={(e) => {
+          if(e.key === "Enter") {
+            createCard()
+          }
+        }}
         value={cardTitle}
         onChange={(e) => setCardTitle(e.target.value)}
         placeholder="Título do card"

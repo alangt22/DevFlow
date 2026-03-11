@@ -21,7 +21,7 @@ export function BoardDetail({ boardId }: { boardId: string }) {
   return (
     <div className="p-4 min-h-screen ">
       <div className="flex items-center gap-4 mb-4">
-        <h1 className="text-2xl font-bold text-white">{board?.title}</h1>
+        <h1 className="text-5xl font-bold text-white">{board?.title}</h1>
       </div>
       {isLoading && <p className="text-white">Carregando...</p>}
 
