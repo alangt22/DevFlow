@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SessionAuthProvider } from "@/providers/session-auth";
 import { Toaster } from "sonner";
+import NextTopLoader from "nextjs-toploader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,6 +31,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SessionAuthProvider>
+          <NextTopLoader color="#0e55e1" height={6} showSpinner={false} />
           <Toaster position="top-right"/>
           {children}
         </SessionAuthProvider>

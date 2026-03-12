@@ -4,6 +4,7 @@ declare module "next-auth" {
   interface Session {
     user: User & DefaultSession["user"];
     boardId?: string;
+    membership?: string;
   }
 }
 
@@ -14,6 +15,7 @@ interface User {
   emailVerified?: null | string | boolean;
   image?: string;
   phone?: string;
+  membership?: string;
   createdAt: string;
   updatedAt: string;
 }

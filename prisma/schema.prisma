@@ -18,6 +18,7 @@ model User {
   // Optional for WebAuthn support
   Authenticator Authenticator[]
 
+  memberships BoardMember[]
   boards Board[]
  
   createdAt DateTime @default(now())
@@ -86,7 +87,8 @@ model Board {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   lists     List[]
-
+  members BoardMember[]
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -117,4 +119,25 @@ model Card {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model BoardMember {
+  id      String @id @default(cuid())
+
+  userId  String
+  boardId String
+
+  role    BoardRole @default(MEMBER)
+
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  board   Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, boardId])
+}
+
+enum BoardRole {
+  OWNER
+  MEMBER
 }

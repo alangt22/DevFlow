@@ -25,13 +25,13 @@ export function BoardsList() {
 
     await axios.delete(`/api/boards/${boardToDelete.id}`);
 
-    toast.success("Board deletado com sucesso!", {
+    toast.warning("Board deletado com sucesso!", {
       position: "top-right",
       duration: 2000,
       style: {
         borderRadius: "10px",
-        background: "#29e251",
-        color: "#ffffff",
+        background: "#e9eda0",
+        color: "#181818",
         fontWeight: "bold",
       },
     });

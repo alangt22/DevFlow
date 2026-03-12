@@ -107,7 +107,11 @@ function SortableList({
           </div>
         </div>
         <div className="border-b border-gray-500 mb-2"></div>
-        <CardList cards={cards} onCardDeleted={onCardDeleted} onCardUpdated={onCardUpdated} />
+        <CardList
+          cards={cards}
+          onCardDeleted={onCardDeleted}
+          onCardUpdated={onCardUpdated}
+        />
       </div>
     );
   }
@@ -147,7 +151,11 @@ function SortableList({
       </div>
       <div className="border-b border-gray-500 mb-2"></div>
       <DroppableList listId={list.id}>
-        <CardList cards={cards} onCardDeleted={onCardDeleted} onCardUpdated={onCardUpdated} />
+        <CardList
+          cards={cards}
+          onCardDeleted={onCardDeleted}
+          onCardUpdated={onCardUpdated}
+        />
       </DroppableList>
       <CreateCard listId={list.id} onCardCreated={onCardCreated} />
     </div>
@@ -320,11 +328,20 @@ export function Lists({ boardId }: { boardId: string }) {
     setLoading(true);
     try {
       await axios.delete(`/api/lists/${listToDelete.id}`);
-      toast.success("Lista deletada!", {
+      toast.warning("Lista deletada com sucesso!", {
         position: "top-right",
         duration: 2000,
+        style: {
+          borderRadius: "10px",
+          background: "#e9eda0",
+          color: "#181818",
+          fontWeight: "bold",
+        },
       });
-      mutateLists(lists.filter((l) => l.id !== listToDelete.id));
+      const newLists = lists.filter((l) => l.id !== listToDelete.id);
+
+      mutateLists(newLists, false);
+      setItems(newLists);
       setListToDelete(null);
     } catch {
       toast.error("Erro ao deletar lista");
@@ -340,12 +357,18 @@ export function Lists({ boardId }: { boardId: string }) {
       await axios.put(`/api/lists/${listToUpdate.id}`, {
         title: listToUpdate.title,
       });
-      toast.success("Lista atualizada!", {
+      toast.success("Lista atualizada com sucesso!", {
         position: "top-right",
         duration: 2000,
+        style: {
+          borderRadius: "10px",
+          background: "#29e251",
+          color: "#ffffff",
+          fontWeight: "bold",
+        },
       });
       mutateLists(
-        lists.map((l) => (l.id === listToUpdate.id ? listToUpdate : l))
+        lists.map((l) => (l.id === listToUpdate.id ? listToUpdate : l)),
       );
       setListToUpdate(null);
     } catch {
@@ -368,14 +391,14 @@ export function Lists({ boardId }: { boardId: string }) {
       [listId]: (prev[listId] || []).filter((c) => c.id !== cardId),
     }));
   }
-function handleCardUpdated(listId: string, updatedCard: Card) {
-  setCardsMap((prev) => ({
-    ...prev,
-    [listId]: (prev[listId] || []).map((c) =>
-      c.id === updatedCard.id ? updatedCard : c
-    ),
-  }));
-}
+  function handleCardUpdated(listId: string, updatedCard: Card) {
+    setCardsMap((prev) => ({
+      ...prev,
+      [listId]: (prev[listId] || []).map((c) =>
+        c.id === updatedCard.id ? updatedCard : c,
+      ),
+    }));
+  }
 
   return (
     <div className="flex gap-3 flex-wrap overflow-x-auto pb-4 px-1 mt-10">

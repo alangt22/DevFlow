@@ -92,7 +92,11 @@ interface CardListProps {
   onCardUpdated?: (card: Card) => void;
 }
 
-export function CardList({ cards, onCardDeleted, onCardUpdated }: CardListProps) {
+export function CardList({
+  cards,
+  onCardDeleted,
+  onCardUpdated,
+}: CardListProps) {
   const sortedCards = [...cards].sort((a, b) => a.order - b.order);
   const [cardToDelete, setCardToDelete] = useState<Card | null>(null);
   const [cardToUpdate, setCardToUpdate] = useState<Card | null>(null);
@@ -110,9 +114,15 @@ export function CardList({ cards, onCardDeleted, onCardUpdated }: CardListProps)
     try {
       await axios.delete(`/api/cards/${cardToDelete.id}`);
       mutate((key) => typeof key === "string" && key.startsWith("/api/cards"));
-      toast.success("Card deletado!", {
+      toast.warning("Card deletado com sucesso!", {
         position: "top-right",
         duration: 2000,
+        style: {
+          borderRadius: "10px",
+          background: "#e9eda0",
+          color: "#181818",
+          fontWeight: "bold",
+        },
       });
 
       onCardDeleted?.(cardToDelete.id);
@@ -124,17 +134,23 @@ export function CardList({ cards, onCardDeleted, onCardUpdated }: CardListProps)
     }
   }
   async function handleUpdateCard(updatedCard: Card) {
-      if (!updatedCard) return;
+    if (!updatedCard) return;
     setLoading(true);
     try {
-      await axios.put(`/api/cards/${updatedCard.id}`,{
+      await axios.put(`/api/cards/${updatedCard.id}`, {
         title: updatedCard.title,
-        description: updatedCard.description
+        description: updatedCard.description,
       });
       mutate((key) => typeof key === "string" && key.startsWith("/api/cards"));
-      toast.success("Card Atualizado!", {
+      toast.success("Card atualizado com sucesso!", {
         position: "top-right",
         duration: 2000,
+        style: {
+          borderRadius: "10px",
+          background: "#29e251",
+          color: "#ffffff",
+          fontWeight: "bold",
+        },
       });
 
       onCardUpdated?.(updatedCard);

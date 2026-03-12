@@ -25,8 +25,14 @@ export async function POST(req: Request) {
   const board = await prisma.board.create({
     data: {
       title: result.data.title,
-      userId: session.user.id
-    }
+      userId: session.user.id,
+      members: {
+        create: {
+          userId: session.user.id,
+          role: "OWNER",
+        }
+      }
+    },
   })
 
   revalidatePath("/dashboard") // Revalida a rota do dashboard para atualizar a lista de boards
@@ -40,8 +46,21 @@ export async function GET() {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
   }
 
+  
+
   const boards = await prisma.board.findMany({
-    where: { userId: session.user.id },
+    where: {
+      OR: [
+        {userId: session.user.id},
+        {
+          members: {
+            some: {
+              userId: session.user.id
+            }
+          }
+        }
+      ]
+    },
     orderBy: { createdAt: "desc" }
   })
   
