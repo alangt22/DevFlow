@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { pusherServer } from "@/lib/pusher"
 import { createListSchema } from "@/lib/validations/list.schema"
 import { NextResponse } from "next/server"
 
@@ -40,6 +41,11 @@ export async function POST(req: Request) {
       order: count, // adiciona no final
     },
   })
+  await pusherServer.trigger(
+    `board-${parse.data.boardId}`,
+    "list-created",
+    list
+  )
 
   return NextResponse.json(list)
 }

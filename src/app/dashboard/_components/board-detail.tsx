@@ -5,8 +5,9 @@ import axios from "axios";
 import { Lists } from "./list";
 import { CreateList } from "./create-list";
 import { FiSearch, FiTrash, FiUser } from "react-icons/fi";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { pusherClient } from "@/lib/pusher-client";
 
 interface Board {
   id: string;
@@ -47,6 +48,21 @@ export function BoardDetail({
 
   const [email, setEmail] = useState("");
   const [users, setUsers] = useState<Users[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+
+  const channel = pusherClient.subscribe(`board-${boardId}`)
+
+  channel.bind("list-created", () => {
+    mutate(`/api/lists?boardId=${boardId}`)
+  })
+
+  return () => {
+    pusherClient.unsubscribe(`board-${boardId}`)
+  }
+
+}, [boardId])
 
   async function handleSearchUsers(userEmail: string) {
     try {
@@ -59,6 +75,7 @@ export function BoardDetail({
   }
 
   async function addMember(userId: string, boardId: string) {
+    setLoading(true);
     try {
       await axios.post(`/api/boards/${boardId}/share`, { userId });
       setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
@@ -77,6 +94,7 @@ export function BoardDetail({
     } catch (error) {
       console.error(error);
     }
+    setLoading(false);
   }
 
   async function removeMember(userId: string) {
@@ -167,7 +185,7 @@ export function BoardDetail({
                         onClick={() => addMember(user?.id, boardId)}
                         className="px-4 py-2 cursor-pointer bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
                       >
-                        Adicionar membro
+                        {loading ? "Adicionando..." : "Adicionar"}
                       </button>
                     </div>
                   </div>
