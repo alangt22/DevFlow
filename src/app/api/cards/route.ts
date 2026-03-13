@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { pusherServer } from "@/lib/pusher"
 import { createCardSchema } from "@/lib/validations/card.schema"
 import { NextResponse } from "next/server"
 
@@ -39,6 +40,19 @@ export async function POST(req: Request) {
       order: count, // adiciona no final da lista
     },
   })
+
+  const listWithBoard = await prisma.list.findUnique({
+    where: { id: parse.data.listId },
+    select: { boardId: true },
+  })
+
+  if (listWithBoard) {
+    await pusherServer.trigger(
+      `board-${listWithBoard.boardId}`,
+      "card-created",
+      card
+    )
+  }
 
   return NextResponse.json(card)
 }

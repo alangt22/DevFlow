@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import  prisma  from "@/lib/prisma";
+import { pusherServer } from "@/lib/pusher";
 import { NextResponse } from "next/server";
 
 export async function DELETE(
@@ -30,6 +31,20 @@ export async function DELETE(
   await prisma.card.delete({
     where: { id },
   });
+
+  const listWithBoard = await prisma.list.findUnique({
+    where: { id: card.listId },
+    select: { boardId: true },
+  })
+
+  if (listWithBoard) {
+    await pusherServer.trigger(
+      `board-${listWithBoard.boardId}`,
+      "card-created",
+      card
+    )
+  }
+
 
   return NextResponse.json({ success: true });
 }
@@ -69,6 +84,18 @@ export async function PUT(
      },
   });
 
+const listWithBoard = await prisma.list.findUnique({
+    where: { id: card.listId },
+    select: { boardId: true },
+  })
+
+  if (listWithBoard) {
+    await pusherServer.trigger(
+      `board-${listWithBoard.boardId}`,
+      "card-created",
+      card
+    )
+  }
 
   return NextResponse.json(updateCard);
 }

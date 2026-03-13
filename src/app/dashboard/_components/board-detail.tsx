@@ -8,6 +8,7 @@ import { FiSearch, FiTrash, FiUser } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { pusherClient } from "@/lib/pusher-client";
+import Image from "next/image";
 
 interface Board {
   id: string;
@@ -58,6 +59,26 @@ export function BoardDetail({
     mutate(`/api/lists?boardId=${boardId}`)
   })
 
+  channel.bind("card-created", () => {
+    mutate(`/api/lists?boardId=${boardId}`)
+  })
+
+  channel.bind("list-updated", () => {
+    mutate(`/api/lists?boardId=${boardId}`)
+  })
+
+  channel.bind("card-updated", () => {
+    mutate(`/api/lists?boardId=${boardId}`)
+  })
+
+  channel.bind("card-deleted", () => {
+    mutate(`/api/lists?boardId=${boardId}`)
+  })
+
+  channel.bind("list-deleted", () => {
+    mutate(`/api/lists?boardId=${boardId}`)
+  })
+
   return () => {
     pusherClient.unsubscribe(`board-${boardId}`)
   }
@@ -75,6 +96,19 @@ export function BoardDetail({
   }
 
   async function addMember(userId: string, boardId: string) {
+    if (board?.members.find((member) => member.user.id === userId)) {
+      toast.warning("Usuário já é membro deste board!", {
+        position: "top-right",
+        duration: 2000,
+        style: {
+          borderRadius: "10px",
+          background: "#e9eda0",
+          color: "#181818",
+        },
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       await axios.post(`/api/boards/${boardId}/share`, { userId });
@@ -92,7 +126,7 @@ export function BoardDetail({
       });
       mutate(`/api/boards/${boardId}`);
     } catch (error) {
-      console.error(error);
+      toast.error("Erro ao adicionar usuário");
     }
     setLoading(false);
   }
@@ -160,10 +194,11 @@ export function BoardDetail({
                 >
                   <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 overflow-hidden">
                     {user.image ? (
-                      <img
+                      <Image
                         src={user.image}
                         alt={user.name}
-                        className="w-full h-full object-cover"
+                        width={40}
+                        height={40}
                       />
                     ) : (
                       <FiUser size={18} />
@@ -208,9 +243,11 @@ export function BoardDetail({
             {/* Avatar */}
             <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 overflow-hidden">
               {member.user.image ? (
-                <img
+                <Image
                   src={member.user.image}
                   alt={member.user.name}
+                  width={40}
+                  height={40}
                   className="w-full h-full object-cover"
                 />
               ) : (
