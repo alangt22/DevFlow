@@ -44,8 +44,13 @@ export function BoardDetail({
   userEmail: string;
 }) {
   const router = useRouter();
+  const routerRef = useRef(router);
   const [isRemoved, setIsRemoved] = useState(false);
   const isRemovedRef = useRef(false);
+
+  useEffect(() => {
+    routerRef.current = router;
+  }, [router]);
 
   useEffect(() => {
     isRemovedRef.current = isRemoved;
@@ -66,9 +71,9 @@ export function BoardDetail({
       },
     });
     setTimeout(() => {
-      router.push("/dashboard");
+      routerRef.current.push("/dashboard");
     }, 3000);
-  }, [router]);
+  }, []);
 
   const { data: board, isLoading } = useSWR<Board>(
     boardId ? `/api/boards/${boardId}` : null,
@@ -116,7 +121,7 @@ export function BoardDetail({
     return () => {
       pusherClient.unsubscribe(`board-${boardId}`);
     };
-  }, [boardId, userEmail, router, checkAndHandleRemoval]);
+  }, [boardId, userEmail, checkAndHandleRemoval]);
 
   const [email, setEmail] = useState("");
   const [users, setUsers] = useState<Users[]>([]);
@@ -177,6 +182,8 @@ export function BoardDetail({
   async function confirmRemoveMember() {
     if (!memberToRemove) return;
 
+    setLoading(true);
+
     try {
       await axios.delete(`/api/boards/${boardId}/share`, { data: { userId: memberToRemove.id } });
       mutate(`/api/boards/${boardId}`);
@@ -195,6 +202,8 @@ export function BoardDetail({
     } catch (error) {
       console.error(error);
     }
+
+    setLoading(false);
   }
 
   const isOwner = board?.members.some(
@@ -251,7 +260,7 @@ export function BoardDetail({
             </button>
           </div>
           <div>
-            <button className="p-2 bg-blue-500 rounded-md text-white hover:bg-blue-600 transition" onClick={toggleModal}>{isOpen ? "Fechar" : "Ver usuários"}</button>
+            <button className="p-2 mb-4 bg-blue-500 rounded-md text-white hover:bg-blue-600 transition" onClick={toggleModal}>{isOpen ? "Fechar" : "Ver usuários"}</button>
           </div>
 
           {/* Lista de usuários encontrados */}

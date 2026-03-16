@@ -170,10 +170,6 @@ export function Lists({ boardId }: { boardId: string }) {
     mutate: mutateLists,
   } = useSWR<List[]>(boardId ? `/api/lists?boardId=${boardId}` : null, fetcher);
 
-  const mutateListsCallback = useCallback(() => {
-    mutateLists();
-  }, [mutateLists]);
-  
   const [items, setItems] = useState<List[]>([]);
   const [listToDelete, setListToDelete] = useState<List | null>(null);
   const [listToUpdate, setListToUpdate] = useState<List | null>(null);
@@ -253,7 +249,7 @@ export function Lists({ boardId }: { boardId: string }) {
     return () => {
       pusherClient.unsubscribe(`board-${boardId}`);
     };
-  }, [boardId, mutateListsCallback, loadCards]);
+  }, [boardId, mutateLists]);
 
   function handleDragStart(event: { active: { id: UniqueIdentifier } }) {
     const activeId = String(event.active.id);
