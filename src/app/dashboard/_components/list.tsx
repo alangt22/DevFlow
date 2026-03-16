@@ -245,6 +245,11 @@ export function Lists({ boardId }: { boardId: string }) {
       mutateLists();
     });
 
+    channel.bind("list-reordered", () => {
+      console.log("list-reordered event received");
+      mutateLists();
+    });
+
     return () => {
       pusherClient.unsubscribe(`board-${boardId}`);
     };
