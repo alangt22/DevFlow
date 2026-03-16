@@ -194,22 +194,22 @@ export function Lists({ boardId }: { boardId: string }) {
     }
   }, [lists]);
 
-  useEffect(() => {
-    async function loadCards() {
-      const cardsData: Record<string, Card[]> = {};
-      for (const list of items) {
-        const cards = await fetcher(`/api/cards?listId=${list.id}`);
-        cardsData[list.id] = cards;
-      }
-      setCardsMap(cardsData);
+  const loadCards = useCallback(async () => {
+    const cardsData: Record<string, Card[]> = {};
+    for (const list of items) {
+      const cards = await fetcher(`/api/cards?listId=${list.id}`);
+      cardsData[list.id] = cards;
     }
-    if (items.length > 0) {
-      loadCards();
-    }
+    setCardsMap(cardsData);
   }, [items]);
 
   useEffect(() => {
+    loadCards();
+  }, [loadCards]);
+
+  useEffect(() => {
     const channel = pusherClient.subscribe(`board-${boardId}`);
+    console.log("Subscribed to channel:", `board-${boardId}`);
 
     channel.bind("list-deleted", () => {
       mutateLists();
@@ -235,10 +235,20 @@ export function Lists({ boardId }: { boardId: string }) {
       mutateLists();
     });
 
+    channel.bind("card-reordered", () => {
+      console.log("card-reordered event received");
+      mutateLists();
+    });
+
+    channel.bind("card-moved", () => {
+      console.log("card-moved event received");
+      mutateLists();
+    });
+
     return () => {
       pusherClient.unsubscribe(`board-${boardId}`);
     };
-  }, [boardId, mutateListsCallback]);
+  }, [boardId, mutateListsCallback, loadCards]);
 
   function handleDragStart(event: { active: { id: UniqueIdentifier } }) {
     const activeId = String(event.active.id);
@@ -349,6 +359,7 @@ export function Lists({ boardId }: { boardId: string }) {
       }));
 
       try {
+        console.log("Calling /api/cards/move", { cardId: activeId, newListId: targetListId });
         await axios.put("/api/cards/move", {
           cardId: activeId,
           newListId: targetListId,
@@ -357,7 +368,8 @@ export function Lists({ boardId }: { boardId: string }) {
           "/api/cards/reorder",
           reorderedSource.map((c, i) => ({ id: c.id, order: i })),
         );
-      } catch {
+      } catch (error) {
+        console.error("Error moving card:", error);
         toast.error("Erro ao mover card");
       }
     }

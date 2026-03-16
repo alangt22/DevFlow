@@ -5,7 +5,7 @@ import axios from "axios";
 import { Lists } from "./list";
 import { CreateList } from "./create-list";
 import { FiSearch, FiTrash, FiUser } from "react-icons/fi";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -49,36 +49,38 @@ export function BoardDetail({
     fetcher,
   );
 
-
   const [isRemoved, setIsRemoved] = useState(false);
+
+  const handleRemove = useCallback(() => {
+    setIsRemoved(true);
+    toast.error("Você foi removido desta board!", {
+      position: "top-right",
+      duration: 3000,
+      style: {
+        borderRadius: "10px",
+        background: "#ef4444",
+        color: "#ffffff",
+        fontWeight: "bold",
+      },
+    });
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 3000);
+  }, [router]);
 
   useEffect(() => {
     const channel = pusherClient.subscribe(`board-${boardId}`);
 
     channel.bind("member-removed", (data: { removedUserEmail: string }) => {
       if (data.removedUserEmail === userEmail) {
-        setIsRemoved(true);
-        toast.error(" Vocé foi removido desta board!", {
-          position: "top-right",
-          duration: 3000,
-          style: {
-            borderRadius: "10px",
-            background: "#ef4444",
-            color: "#ffffff",
-            fontWeight: "bold",
-          },
-        });
-        const timeout = setTimeout(() => {
-          router.push("/dashboard");
-        }, 3000);
-        return () => clearTimeout(timeout);
+        handleRemove();
       }
     });
 
     return () => {
       pusherClient.unsubscribe(`board-${boardId}`);
     };
-  }, [boardId, userEmail, router]);
+  }, [boardId, userEmail, handleRemove]);
 
   const [email, setEmail] = useState("");
   const [users, setUsers] = useState<Users[]>([]);
