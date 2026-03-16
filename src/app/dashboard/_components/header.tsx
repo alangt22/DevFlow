@@ -17,7 +17,7 @@ export function Header() {
           onClick={() => signOut({ callbackUrl: "/" })}
           className="cursor-pointer text-gray-300 hover:text-red-500 flex items-center gap-1 font-semibold transition"
         >
-          <FiLogOut size={18} className="inline-block mr-2" />
+          <FiLogOut size={24} className="inline-block mr-2" />
         </button>
 
       </div>

@@ -121,6 +121,8 @@ export function BoardDetail({
   const [email, setEmail] = useState("");
   const [users, setUsers] = useState<Users[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<{ id: string; name: string } | null>(null);
 
   async function handleSearchUsers(userEmail: string) {
     try {
@@ -168,9 +170,15 @@ export function BoardDetail({
     setLoading(false);
   }
 
-  async function removeMember(userId: string) {
+  function openRemoveModal(userId: string, userName: string) {
+    setMemberToRemove({ id: userId, name: userName });
+  }
+
+  async function confirmRemoveMember() {
+    if (!memberToRemove) return;
+
     try {
-      await axios.delete(`/api/boards/${boardId}/share`, { data: { userId } });
+      await axios.delete(`/api/boards/${boardId}/share`, { data: { userId: memberToRemove.id } });
       mutate(`/api/boards/${boardId}`);
       toast.warning("Usuário removido com sucesso!", {
         position: "top-right",
@@ -182,6 +190,7 @@ export function BoardDetail({
           fontWeight: "bold",
         },
       });
+      setMemberToRemove(null);
       mutate(`/api/boards/${boardId}`);
     } catch (error) {
       console.error(error);
@@ -205,6 +214,12 @@ export function BoardDetail({
       </div>
     );
   }
+
+  function toggleModal() {
+    setIsOpen(!isOpen);
+  }
+
+  
 
   return (
     <div className="p-4 min-h-screen ">
@@ -234,6 +249,9 @@ export function BoardDetail({
             >
               <FiSearch size={20} />
             </button>
+          </div>
+          <div>
+            <button className="p-2 bg-blue-500 rounded-md text-white hover:bg-blue-600 transition" onClick={toggleModal}>{isOpen ? "Fechar" : "Ver usuários"}</button>
           </div>
 
           {/* Lista de usuários encontrados */}
@@ -286,7 +304,8 @@ export function BoardDetail({
       {isLoading && <p className="text-gray-700 mb-6">Carregando...</p>}
 
       {/* MEMBROS DA BOARD */}
-      <div className="space-y-3 mb-8">
+      {isOpen && (
+              <div className="space-y-3 mb-8">
         {board?.members.map((member) => (
           <div
             key={member.user.id}
@@ -319,10 +338,10 @@ export function BoardDetail({
             <div className="ml-auto flex flex-col items-end gap-1">
               {member.role === "MEMBER" && isOwner && (
                 <button
-                  onClick={() => removeMember(member.user.id)}
+                  onClick={() => openRemoveModal(member.user.id, member.user.name || member.user.email)}
                   className="text-xs cursor-pointer px-2 py-1 text-gray-200 hover:text-red-500 transition"
                 >
-                  <FiTrash size={16} />
+                  <FiTrash size={20} />
                 </button>
               )}
               {member.role === "OWNER" ? (
@@ -338,10 +357,39 @@ export function BoardDetail({
           </div>
         ))}
       </div>
+      )}
 
       {/* Lists */}
       <CreateList boardId={boardId} />
       <Lists boardId={boardId} />
+
+      {/* Modal de remoção de membro */}
+      {memberToRemove && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-gray-900 rounded-lg p-6 max-w-sm w-full mx-4 shadow-xl">
+            <h3 className="text-lg font-bold text-gray-100 mb-2">
+              Remover membro
+            </h3>
+            <p className="text-gray-300 mb-6">
+              Tem certeza que deseja remover <strong>{memberToRemove.name}</strong> desta board?
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setMemberToRemove(null)}
+                className="px-4 py-2 rounded text-gray-600 hover:bg-gray-100 transition"
+              >
+                {loading ? "Cancelando..." : "Cancelar"}
+              </button>
+              <button
+                onClick={confirmRemoveMember}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+              >
+                {loading ? "Removendo..." : "Remover"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
