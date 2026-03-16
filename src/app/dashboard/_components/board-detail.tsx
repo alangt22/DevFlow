@@ -5,7 +5,7 @@ import axios from "axios";
 import { Lists } from "./list";
 import { CreateList } from "./create-list";
 import { FiSearch, FiTrash, FiUser } from "react-icons/fi";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -44,14 +44,16 @@ export function BoardDetail({
   userEmail: string;
 }) {
   const router = useRouter();
-  const { data: board, isLoading } = useSWR<Board>(
-    boardId ? `/api/boards/${boardId}` : null,
-    fetcher,
-  );
-
   const [isRemoved, setIsRemoved] = useState(false);
+  const isRemovedRef = useRef(false);
 
-  const handleRemove = useCallback(() => {
+  useEffect(() => {
+    isRemovedRef.current = isRemoved;
+  }, [isRemoved]);
+
+  const checkAndHandleRemoval = useCallback(() => {
+    if (isRemovedRef.current) return;
+    isRemovedRef.current = true;
     setIsRemoved(true);
     toast.error("Você foi removido desta board!", {
       position: "top-right",
@@ -68,19 +70,53 @@ export function BoardDetail({
     }, 3000);
   }, [router]);
 
+  const { data: board, isLoading } = useSWR<Board>(
+    boardId ? `/api/boards/${boardId}` : null,
+    fetcher,
+    {
+      onSuccess: (data) => {
+        if (!isRemovedRef.current) {
+          const normalizedUserEmail = userEmail.toLowerCase();
+          const isStillMember = data.members.some(
+            (member: BoardMember) => member.user.email?.toLowerCase() === normalizedUserEmail
+          );
+          if (!isStillMember) {
+            checkAndHandleRemoval();
+          }
+        }
+      },
+      onError: () => {
+        if (!isRemovedRef.current) {
+          checkAndHandleRemoval();
+        }
+      },
+    }
+  );
+
   useEffect(() => {
     const channel = pusherClient.subscribe(`board-${boardId}`);
 
     channel.bind("member-removed", (data: { removedUserEmail: string }) => {
-      if (data.removedUserEmail === userEmail) {
-        handleRemove();
+      console.log("Pusher event received:", data);
+      const normalizedUserEmail = userEmail.toLowerCase().trim();
+      const normalizedRemovedEmail = data.removedUserEmail?.toLowerCase().trim();
+      if (normalizedRemovedEmail === normalizedUserEmail) {
+        checkAndHandleRemoval();
       }
+    });
+
+    channel.bind("pusher:subscription_succeeded", () => {
+      console.log("Pusher subscribed to board-" + boardId);
+    });
+
+    channel.bind("pusher:error", (err: { error: { message: string } }) => {
+      console.error("Pusher error:", err);
     });
 
     return () => {
       pusherClient.unsubscribe(`board-${boardId}`);
     };
-  }, [boardId, userEmail, handleRemove]);
+  }, [boardId, userEmail, router, checkAndHandleRemoval]);
 
   const [email, setEmail] = useState("");
   const [users, setUsers] = useState<Users[]>([]);
