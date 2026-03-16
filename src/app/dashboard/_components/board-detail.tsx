@@ -5,9 +5,8 @@ import axios from "axios";
 import { Lists } from "./list";
 import { CreateList } from "./create-list";
 import { FiSearch, FiTrash, FiUser } from "react-icons/fi";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { pusherClient } from "@/lib/pusher-client";
 import Image from "next/image";
 
 interface Board {
@@ -50,40 +49,6 @@ export function BoardDetail({
   const [email, setEmail] = useState("");
   const [users, setUsers] = useState<Users[]>([]);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-
-  const channel = pusherClient.subscribe(`board-${boardId}`)
-
-  channel.bind("list-created", () => {
-    mutate(`/api/lists?boardId=${boardId}`)
-  })
-
-  channel.bind("card-created", () => {
-    mutate(`/api/lists?boardId=${boardId}`)
-  })
-
-  channel.bind("list-updated", () => {
-    mutate(`/api/lists?boardId=${boardId}`)
-  })
-
-  channel.bind("card-updated", () => {
-    mutate(`/api/lists?boardId=${boardId}`)
-  })
-
-  channel.bind("card-deleted", () => {
-    mutate(`/api/lists?boardId=${boardId}`)
-  })
-
-  channel.bind("list-deleted", () => {
-    mutate(`/api/lists?boardId=${boardId}`)
-  })
-
-  return () => {
-    pusherClient.unsubscribe(`board-${boardId}`)
-  }
-
-}, [boardId])
 
   async function handleSearchUsers(userEmail: string) {
     try {

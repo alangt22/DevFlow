@@ -1,12 +1,13 @@
 "use client";
 
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import axios from "axios";
 import { CreateCard } from "./create-card";
 import { CardList } from "./card-list";
 import { FiEdit, FiMove } from "react-icons/fi";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
+import { pusherClient } from "@/lib/pusher-client";
 
 import {
   SortableContext,
@@ -168,6 +169,11 @@ export function Lists({ boardId }: { boardId: string }) {
     isLoading,
     mutate: mutateLists,
   } = useSWR<List[]>(boardId ? `/api/lists?boardId=${boardId}` : null, fetcher);
+
+  const mutateListsCallback = useCallback(() => {
+    mutateLists();
+  }, [mutateLists]);
+  
   const [items, setItems] = useState<List[]>([]);
   const [listToDelete, setListToDelete] = useState<List | null>(null);
   const [listToUpdate, setListToUpdate] = useState<List | null>(null);
@@ -180,9 +186,11 @@ export function Lists({ boardId }: { boardId: string }) {
   } | null>(null);
 
   useEffect(() => {
-    if (lists.length) {
+    if (lists) {
       const sorted = [...lists].sort((a, b) => a.order - b.order);
       setItems(sorted);
+    } else {
+      setItems([]);
     }
   }, [lists]);
 
@@ -199,6 +207,38 @@ export function Lists({ boardId }: { boardId: string }) {
       loadCards();
     }
   }, [items]);
+
+  useEffect(() => {
+    const channel = pusherClient.subscribe(`board-${boardId}`);
+
+    channel.bind("list-deleted", () => {
+      mutateLists();
+    });
+
+    channel.bind("list-created", () => {
+      mutateLists();
+    });
+
+    channel.bind("list-updated", () => {
+      mutateLists();
+    });
+
+    channel.bind("card-created", () => {
+      mutateLists();
+    });
+
+    channel.bind("card-updated", () => {
+      mutateLists();
+    });
+
+    channel.bind("card-deleted", () => {
+      mutateLists();
+    });
+
+    return () => {
+      pusherClient.unsubscribe(`board-${boardId}`);
+    };
+  }, [boardId, mutateListsCallback]);
 
   function handleDragStart(event: { active: { id: UniqueIdentifier } }) {
     const activeId = String(event.active.id);

@@ -34,7 +34,7 @@ export async function DELETE(
     where: { id },
   });
 
-  await pusherServer.trigger(`board-${list.boardId}`, "list-updated", list);
+  await pusherServer.trigger(`board-${list.boardId}`, "list-deleted", list);
 
   return NextResponse.json({ success: true });
 }
