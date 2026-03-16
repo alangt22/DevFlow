@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import { pusherServer } from "@/lib/pusher";
 
 export async function POST(
   req: Request,
@@ -94,12 +95,21 @@ export async function DELETE(
       )
     }
 
+    const userToRemove = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+
     await prisma.boardMember.deleteMany({
       where: {
         boardId,
         userId
       }
     })
+
+    await pusherServer.trigger(`board-${boardId}`, "member-removed", {
+      removedUserEmail: userToRemove?.email,
+    });
 
     return NextResponse.json({ message: "Membro removido" })
 

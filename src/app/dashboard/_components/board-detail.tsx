@@ -5,9 +5,11 @@ import axios from "axios";
 import { Lists } from "./list";
 import { CreateList } from "./create-list";
 import { FiSearch, FiTrash, FiUser } from "react-icons/fi";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { pusherClient } from "@/lib/pusher-client";
 
 interface Board {
   id: string;
@@ -41,10 +43,42 @@ export function BoardDetail({
   boardId: string;
   userEmail: string;
 }) {
+  const router = useRouter();
   const { data: board, isLoading } = useSWR<Board>(
     boardId ? `/api/boards/${boardId}` : null,
     fetcher,
   );
+
+
+  const [isRemoved, setIsRemoved] = useState(false);
+
+  useEffect(() => {
+    const channel = pusherClient.subscribe(`board-${boardId}`);
+
+    channel.bind("member-removed", (data: { removedUserEmail: string }) => {
+      if (data.removedUserEmail === userEmail) {
+        setIsRemoved(true);
+        toast.error(" Vocé foi removido desta board!", {
+          position: "top-right",
+          duration: 3000,
+          style: {
+            borderRadius: "10px",
+            background: "#ef4444",
+            color: "#ffffff",
+            fontWeight: "bold",
+          },
+        });
+        const timeout = setTimeout(() => {
+          router.push("/dashboard");
+        }, 3000);
+        return () => clearTimeout(timeout);
+      }
+    });
+
+    return () => {
+      pusherClient.unsubscribe(`board-${boardId}`);
+    };
+  }, [boardId, userEmail, router]);
 
   const [email, setEmail] = useState("");
   const [users, setUsers] = useState<Users[]>([]);
@@ -119,6 +153,21 @@ export function BoardDetail({
   const isOwner = board?.members.some(
     (member) => member.user.email === userEmail && member.role === "OWNER",
   );
+
+  if (isRemoved) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-500 mb-4">
+            Acesso Negado
+          </h2>
+          <p className="text-gray-600">Você foi removido desta board.</p>
+          <p className="text-gray-500 mt-2">Redirecionando para o Dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 min-h-screen ">
       {/* Título da Board */}
