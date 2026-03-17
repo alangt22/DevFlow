@@ -38,35 +38,6 @@ DevFlow é um clone do Trello desenvolvido com Next.js, permitindo gestão de ta
 - **Toasts:** Sonner
 - **Ícones:** React Icons (FiIcons)
 
-## Como Executar
-
-1. Instale as dependências:
-```bash
-npm install
-```
-
-2. Configure as variáveis de ambiente:
-```bash
-cp .env.example .env
-```
-Preencha o arquivo `.env` com suas credenciais:
-- `DATABASE_URL` - URL do banco de dados PostgreSQL
-- `NEXTAUTH_SECRET` - Chave secreta para NextAuth
-- `NEXTAUTH_URL` - URL da aplicação
-- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` - Credenciais do Google OAuth
-- `PUSHER_APP_ID` / `PUSHER_KEY` / `PUSHER_SECRET` / `PUSHER_CLUSTER` - Credenciais do Pusher
-
-3. Execute as migrations do Prisma:
-```bash
-npx prisma migrate dev
-```
-
-4. Inicie o servidor de desenvolvimento:
-```bash
-npm run dev
-```
-
-5. Acesse `http://localhost:3000`
 
 ## Estrutura do Projeto
 

@@ -61,8 +61,8 @@ export function BoardsList() {
       
       <h1 className="text-2xl font-bold text-gray-600">Seus Quadros</h1>
 
-      <div className="flex gap-4 mb-4">
-        <div className="bg-white p-4 rounded-lg shadow border border-gray-200 flex items-center gap-3">
+      <div className="flex gap-1 lg:gap-4 mb-4 ">
+        <div className="w-26 lg:w-36 bg-white p-4 rounded-lg shadow border border-gray-200 flex items-center gap-1">
           <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
             <FiGrid className="text-blue-600" size={20} />
           </div>
@@ -71,7 +71,7 @@ export function BoardsList() {
             <p className="text-xs text-gray-500">Boards</p>
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow border border-gray-200 flex items-center gap-3">
+        <div className="w-26 lg:w-36 bg-white p-4 rounded-lg shadow border border-gray-200 flex items-center gap-3">
           <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
             <FiList className="text-green-600" size={20} />
           </div>
@@ -80,7 +80,7 @@ export function BoardsList() {
             <p className="text-xs text-gray-500">Listas</p>
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow border border-gray-200 flex items-center gap-3">
+        <div className="w-26 lg:w-36 bg-white p-4 rounded-lg shadow border border-gray-200 flex items-center gap-3">
           <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
             <FiCheckSquare className="text-purple-600" size={20} />
           </div>
