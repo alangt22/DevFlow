@@ -4,7 +4,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import axios from "axios";
 import Link from "next/link";
-import { FiTrash } from "react-icons/fi";
+import { FiGrid, FiTrash } from "react-icons/fi";
 import { toast } from "sonner";
 
 interface Board {
@@ -44,7 +44,7 @@ export function BoardsList() {
   return (
     <div className="flex flex-col gap-4 mt-10">
       
-      <h1 className="text-2xl font-bold">Seus Boards</h1>
+      <h1 className="text-2xl font-bold text-gray-600">Seus Quadros</h1>
 
       <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {isLoading && <p className="text-gray-200">Carregando...</p>}
@@ -53,9 +53,12 @@ export function BoardsList() {
           <li key={board.id}>
             <Link
               href={`/dashboard/boards/${board.id}`}
-              className="p-4 rounded-lg border border-blue-400 bg-blue-600 hover:bg-gray-800 transition flex justify-between"
+              className="p-4 rounded-lg shadow-2xl border border-blue-400/50 bg-blue-400/50 hover:bg-blue-500 transition flex justify-between"
             >
-              <p className="font-semibold">{board.title}</p>
+              <div className="flex gap-2">
+                <FiGrid size={24} />
+                <p className="font-bold capitalize">{board.title}</p>
+              </div>
 
               <button
                 onClick={(e) => {
@@ -65,7 +68,7 @@ export function BoardsList() {
                 }}
                 className="text-gray-200 hover:text-red-500 transition"
               >
-                <FiTrash />
+                <FiTrash size={24} />
               </button>
             </Link>
           </li>

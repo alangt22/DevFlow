@@ -50,7 +50,7 @@ export function CreateList({ boardId }: { boardId: string }) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="min-w-[272px] max-w-[272px] cursor-pointer bg-[#ffffff3d] hover:bg-[#ffffff52] text-white rounded-lg p-2 flex items-center gap-2 transition"
+        className="min-w-[272px] max-w-[272px] cursor-pointer bg-blue-400 hover:bg-blue-500 text-white rounded-lg p-2 flex items-center gap-2 transition"
       >
         <FiPlus /> Adicionar uma lista
       </button>
@@ -58,7 +58,7 @@ export function CreateList({ boardId }: { boardId: string }) {
   }
 
   return (
-    <div className="min-w-[272px] max-w-[272px] bg-[#a1b3d8] rounded-lg p-2">
+    <div className="min-w-[272px] max-w-[272px] bg-blue-400/50 rounded-lg p-2">
       <input
         onKeyDown={(e) => {
           if(e.key === "Enter"){
@@ -75,13 +75,13 @@ export function CreateList({ boardId }: { boardId: string }) {
         <button
           onClick={createList}
           disabled={loading || !listTitle.trim()}
-          className="bg-[#0079bf] cursor-pointer text-white px-3 py-1.5 rounded text-sm hover:bg-[#026aa7] disabled:opacity-50"
+          className="bg-blue-500 cursor-pointer text-white px-3 py-1.5 rounded text-sm hover:bg-blue-600 disabled:opacity-50"
         >
           {loading ? "..." : "Adicionar lista"}
         </button>
         <button
           onClick={() => setIsOpen(false)}
-          className="text-gray-500 hover:text-red-500 mr-4 text-xl font-bold cursor-pointer transition"
+          className="text-gray-500 hover:text-red-500 mr-4 text-3xl font-bold cursor-pointer transition"
         >
           x
         </button>

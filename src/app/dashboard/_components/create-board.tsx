@@ -44,7 +44,7 @@ export function CreateBoard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-3">Crie Seus Boards</h1>
+      <h1 className="text-2xl font-bold mb-3 text-gray-600">Crie Seus Quadros</h1>
 
       <div className="flex items-center gap-3">
         <input
@@ -55,8 +55,8 @@ export function CreateBoard() {
               createBoard();
             }
           }}
-          placeholder="Nome do board"
-          className="border p-2 rounded w-80 h-10 focus:outline-none"
+          placeholder="Nome do quadro"
+          className="border border-gray-700 text-gray-400 shadow-2xl p-2 rounded w-80 h-10 focus:outline-none"
         />
 
         <button
