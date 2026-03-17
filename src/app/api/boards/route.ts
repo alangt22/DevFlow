@@ -61,6 +61,13 @@ export async function GET() {
         }
       ]
     },
+    include: {
+      lists: {
+        include: {
+          cards: true
+        }
+      }
+    },
     orderBy: { createdAt: "desc" }
   })
   

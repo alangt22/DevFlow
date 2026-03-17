@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { CreateBoard } from "./_components/create-board";
 import { BoardsList } from "./_components/boards-list";
+import { RightPanel } from "./_components/right-panel";
 import Image from "next/image";
 
 export default async function Dashboard() {
@@ -12,29 +13,32 @@ export default async function Dashboard() {
   }
 
   return (
-    <section>
-      
-      <div className="flex mb-10">
-        <div className="p-2">
+    <div className="gap-8 max-w-7xl mx-auto lg:flex">
+      <div className="flex-1">
+        <div className="flex items-center gap-4 mb-8">
           <Image
             src={session.user?.image || ""}
             alt={session.user?.name || ""}
-            width={40}
-            height={40}
+            width={50}
+            height={50}
             className="rounded-full"
           />
+          <div>
+            <h1 className="text-2xl text-gray-800 font-bold capitalize">
+              Bem-vindo, {session.user?.name}
+            </h1>
+            <p className="text-gray-500">{session.user?.email}</p>
+          </div>
         </div>
-        <div className="flex flex-col p-1">
-          <h1 className="text-2xl text-gray-800 font-bold capitalize">
-            Bem-vindo, {session.user?.name}
-          </h1>
-          <p className="text-gray-500 mb-20">{session.user?.email}</p>
-        </div>
+
+        <CreateBoard />
+        <BoardsList />
+      </div>
+      <div className="mt-12">
+        <RightPanel />
       </div>
 
-
-      <CreateBoard />
-      <BoardsList />
-    </section>
+      
+    </div>
   );
 }

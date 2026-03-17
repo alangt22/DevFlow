@@ -4,12 +4,24 @@ import { useState } from "react";
 import useSWR from "swr";
 import axios from "axios";
 import Link from "next/link";
-import { FiGrid, FiTrash } from "react-icons/fi";
+import { FiGrid, FiTrash, FiList, FiCheckSquare } from "react-icons/fi";
 import { toast } from "sonner";
+
+interface Card {
+  id: string;
+  title: string;
+}
+
+interface List {
+  id: string;
+  title: string;
+  cards: Card[];
+}
 
 interface Board {
   id: string;
   title: string;
+  lists: List[];
 }
 
 const fetcher = (url: string) => axios.get(url).then((res) => res.data);
@@ -18,6 +30,9 @@ export function BoardsList() {
   const { data: boards = [], isLoading, mutate } = useSWR<Board[]>("/api/boards", fetcher);
   const [boardToDelete, setBoardToDelete] = useState<Board | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const totalLists = boards.reduce((acc, board) => acc + board.lists.length, 0);
+  const totalCards = boards.reduce((acc, board) => acc + board.lists.reduce((a, list) => a + list.cards.length, 0), 0);
 
   async function handleDelete() {
     if (!boardToDelete) return;
@@ -45,6 +60,36 @@ export function BoardsList() {
     <div className="flex flex-col gap-4 mt-10">
       
       <h1 className="text-2xl font-bold text-gray-600">Seus Quadros</h1>
+
+      <div className="flex gap-4 mb-4">
+        <div className="bg-white p-4 rounded-lg shadow border border-gray-200 flex items-center gap-3">
+          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+            <FiGrid className="text-blue-600" size={20} />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-gray-800">{boards.length}</p>
+            <p className="text-xs text-gray-500">Boards</p>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow border border-gray-200 flex items-center gap-3">
+          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+            <FiList className="text-green-600" size={20} />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-gray-800">{totalLists}</p>
+            <p className="text-xs text-gray-500">Listas</p>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow border border-gray-200 flex items-center gap-3">
+          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+            <FiCheckSquare className="text-purple-600" size={20} />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-gray-800">{totalCards}</p>
+            <p className="text-xs text-gray-500">Cards</p>
+          </div>
+        </div>
+      </div>
 
       <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {isLoading && <p className="text-gray-200">Carregando...</p>}
